@@ -35,10 +35,40 @@ void COLOR_PRINT(const char* s, int color) {
 	SetConsoleTextAttribute(handle, FOREGROUND_INTENSITY | 7);
 }
 
+BOOL CALLBACK CProc(HWND hWnd, LPARAM lParam) {
+	if (IsWindowVisible(hWnd)) {
+		CHAR name[MAX_PATH] = { 0, };
+		GetWindowTextA(hWnd, name, MAX_PATH);
+		if (name[0] == '\0') return TRUE;
+
+		COLOR_PRINT("Find Window: ", 9);
+		printf("%s\n", name);
+	}
+
+	return TRUE;
+}
+
+BOOL CALLBACK EnumWindowProc(HWND hWnd, LPARAM lParam) {
+	if (IsWindowVisible(hWnd)) {
+		CHAR name[MAX_PATH] = { 0, };
+		GetWindowTextA(hWnd, name, MAX_PATH);
+		if (name[0] == '\0') return TRUE;
+
+		COLOR_PRINT("Find Window: ", 9);
+		printf("%s\n", name);
+	}
+
+	EnumChildWindows(hWnd, CProc, 0);
+	return TRUE;
+}
 
 int main(int argc, char* argv[]) {
 	if (argc != 2) {
-		printf("Use: NotCaptureCmd.exe <Window Name>\n");
+		printf("Use: NotCaptureCmd.exe <Window Name>\n\n");
+
+		COLOR_PRINT("List all windows:\n", 14);
+		EnumWindows(EnumWindowProc, 0);
+
 		return 0;
 	}
 
@@ -48,13 +78,16 @@ int main(int argc, char* argv[]) {
 	printf("===========================================\n");
 
 	bool isHide = true;
-	COLOR_PRINT("Run Mode: [h/s]\n", 14);
+	COLOR_PRINT("Choose Run Mode: [h/s]\n", 14);
 
 	char c = '.';
 	while (c != 'h' && c != 's') {
 		c = _getch();
 	}
 	isHide = (c == 'h' ? true : false);
+
+	printf("\n");
+	COLOR_PRINT("===============Start Inject!===============\n", 10);
 
 	HWND hWnd = FindWindowA(NULL, argv[1]);
 	if (hWnd == NULL) {
@@ -145,7 +178,7 @@ int main(int argc, char* argv[]) {
 	CloseHandle(hRemote);
 	CloseHandle(hProcess);
 
-	COLOR_PRINT("=======Successful!=======\n", 10);
+	COLOR_PRINT("================Successful!================\n", 10);
 
 	return 0;
 }
